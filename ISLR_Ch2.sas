@@ -235,7 +235,7 @@ run;
 
 /* Exercise 8 */
 
-/* 8 (a) (b) */
+/* 8 (a) (b) Read data*/
 filename csvfile "/folders/myshortcuts/dc/data/College.csv" termstr=CRLF;
 proc import datafile=csvfile
             dbms=csv
@@ -306,6 +306,33 @@ run;
 proc sgplot data=dxc;
    vbox outstate / group=private;
 run;   
+
+/* 8(c)iv */
+/* In IML, you can't mix character and numeric in a matrix. */
+/* You can finish the exerice with DATA STEP, but I will try it with IML here. */
+/* I will use numeric 0 for character "No", 1 for "Yes" */
+/* Avoid loop in IML */
+proc iml;
+use college;
+   read all var _NUM_ into X[colname=NumerNames];
+   read all var _CHAR_ into C[colname=CharNames];
+summary class {private};
+close college;
+print X;
+
+privC = C[,"Private"];
+private =  j(nrow(C),1,0);
+private = (privC="Yes");
+/* print private; */
+
+eliteX = X[,"Top10perc"];
+/* print eliteX; */
+elite = j(nrow(X),1,0);
+elite = (eliteX>50);
+/* print elite; */
+
+/* pretty awarkard. can be a little more elegant? */
+
 
 
 
