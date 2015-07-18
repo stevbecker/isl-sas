@@ -314,24 +314,44 @@ run;
 /* Avoid loop in IML */
 proc iml;
 use college;
-   read all var _NUM_ into X[colname=NumerNames];
-   read all var _CHAR_ into C[colname=CharNames];
+/*    read all var _NUM_ into X[colname=NumerNames]; */
+   read all var {Outstate Top10perc};
+   read all var {private};
 summary class {private};
 close college;
-print X;
+/* print X; */
 
-privC = C[,"Private"];
-private =  j(nrow(C),1,0);
-private = (privC="Yes");
+call Bar(private);
+private = (private="Yes");
 /* print private; */
+/* call Bar(private); */
 
-eliteX = X[,"Top10perc"];
-/* print eliteX; */
-elite = j(nrow(X),1,0);
-elite = (eliteX>50);
-/* print elite; */
+/* create a new vector Elite by binning Top10perc */
+/* EliteX = X[,"Top10perc"]; */
+/* print EliteX; */
+Elite = j(nrow(Top10perc),1,0);
+Elite = (Top10perc>50);
+call Bar(Elite);
 
-/* pretty awarkard. can be a little more elegant? */
+/* Outstate and Elite are column vectors. Theya aren't in a matrix.*/
+title "Boxplots of Outstate vs Elite";
+call Box(Outstate) Category=elite;
+
+
+/* 8(c)v */
+/* proc sgpanel data=college; */
+/*    panelby Private; */
+/*    histogram Top10perc; */
+/*    density Top10perc; */
+/* run;    */
+
+proc sgscatter data=college;
+/*    matrix _NUMERIC_ / diagonal = (histogram kernel); */
+   matrix Apps Accept Outstate Top10perc 
+      / diagonal=(histogram kernel)
+        group=Private;
+run;
+
 
 
 
