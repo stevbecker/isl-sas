@@ -1,5 +1,5 @@
 
-/* 2.3 Lab: Introduction to R */
+/* 2.3 Lab */
 
 /* 2.3.1 Basic Commands */
 proc iml;
@@ -180,7 +180,7 @@ print anr anc;
 
 /* Import from Auto.csv. There are error warning though getting data into dataset. */
 proc import out=work.auto
-            datafile='/folders/myshortcuts/1aDC/data4dc/Auto.csv'
+            datafile='/folders/myshortcuts/dc/data/Auto.csv'
             dbms=csv replace;
             getnames=yes;
             datarow=2;
@@ -353,6 +353,28 @@ proc sgscatter data=college;
 run;
 
 
+/* Exercise 9 */
+filename csvfile "/folders/myshortcuts/dc/data/Auto.csv";
+proc import datafile=csvfile dbms=csv out=auto replace;
+run;
+
+/* Remove observations with missing values */
+data autoNoMiss;
+   set auto;
+   if cmiss(of _all_) then delete;
+run;
+
+/* 9(a) */
+proc contents data=autoNoMiss(keep=_numeric_);
+run;
+
+proc contents data=autoNoMiss(keep=_char_);
+run;
+
+/* 9(b)(c) */
+proc means data=autoNoMiss min max range mean std;
+   var _numeric_;
+run;   
 
 
 
