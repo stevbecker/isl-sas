@@ -376,5 +376,117 @@ proc means data=autoNoMiss min max range mean std;
    var _numeric_;
 run;   
 
+/* 9(d) */
+data subAutoNoMiss;
+   set autoNoMiss;
+   if _n_ >= 10 and _n_ <= 85 then delete;
+run;   
+
+proc means data=subAutoNoMiss range mean std;
+   var _numeric_;
+run;
+
+proc univariate data=autoNoMiss;
+   histogram / normal;
+/*    by origin notsorted; */
+run;   
+
+
+proc sgscatter data=autoNoMiss;
+   matrix _numeric_ 
+   / diagonal=(kernel histogram)
+     group=origin;
+run;   
+         
+
+/* Exercise 10 */
+
+/* 10(a) */
+/* Boston.csv exported in R has an added column. */
+/* Using Google Refine, remove this column, save it as Boston2.csv */
+filename csvfile "/folders/myshortcuts/dc/data/Boston2.csv";
+proc import datafile=csvfile dbms=csv out=Boston replace;
+
+/* data boston(drop=var1); */
+/*    set bostonraw; */
+/* run;    */
+
+proc contents data=Boston;
+run;         
+   
+/* 10(b) */
+proc sgscatter data=Boston;
+   matrix _numeric_ / diagonal=(kernel histogram);
+/*    matrix crim zn age dis rad tax ptratio black medv */
+/*    / diagonal=(kernel histogram); */
+run;
+
+/* 10(c) */
+proc sgplot data=Boston;
+   scatter x=age y=crim;  
+run;   
+
+proc sgplot data=Boston;
+   scatter x=dis y=crim;   
+run;  
+
+proc sgplot data=Boston;
+   scatter x=rad y=crim;   
+run;  
+
+proc sgplot data=Boston;
+   scatter x=tax y=crim;   
+run;  
+
+proc sgplot data=Boston;
+   scatter x=ptratio y=crim;   
+run;     
+
+/* 10(d) */
+proc univariate data=Boston;
+   histogram;
+   var crim tax ptratio;
+run;   
+
+/* 10(e) */
+proc sgplot data=Boston;
+   vbar chas;
+run;   
+
+proc freq data=Boston;
+   table chas;
+run;
+
+
+/* 10(f) */
+proc means data=Boston Q1 Median Q3 QRange;
+   var ptratio;
+run;
+   
+/* 10(g) */
+proc sql;
+select * from Boston having medv=min(medv);
+quit;
+
+/* 10(h) */
+proc sql number;
+select * from Boston where rm > 7;
+
+
+proc sql number;
+select * from Boston where rm > 8;
+quit;
+
+proc sql;
+create table BostonRm8 as
+   select * from Boston where rm > 8;
+quit;   
+
+
+proc means data=Boston;
+run;
+proc means data=BostonRm8;
+run;
+
 
 
