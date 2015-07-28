@@ -12,6 +12,7 @@ proc reg data=advertising;
    ods output ParameterEstimates=PE;
 run;
 
+
 data _null_;
    set PE;
    if _n_ = 1 then call symput('Int', put(estimate, BEST6.));    
@@ -58,6 +59,15 @@ call Scatter(x,y);
 /* print (y[1:10]); */
 
 
+/* Table 3.4 */
+proc reg data=advertising;
+   model sales = tv radio newspaper;
+run;   
+
+/* Table 3.5 */
+proc corr data=advertising;
+   var tv radio newspaper sales;
+run;   
 
 
 
