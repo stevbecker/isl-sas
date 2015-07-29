@@ -6,6 +6,7 @@
 filename csvfile "&datapath/Advertising.csv";
 proc import datafile=csvfile dbms=csv out=advertising replace;
 
+
 ods graphics off;
 proc reg data=advertising;
    model sales = tv;
@@ -66,9 +67,37 @@ run;
 
 /* Table 3.5 */
 proc corr data=advertising;
-   var tv radio newspaper sales;
+   var tv radio newspaper;
 run;   
 
+/* Credit */
+filename csvfile "&datapath/Credit.csv";
+proc import datafile=csvfile dbms=csv out=credit replace;
 
+data credit;
+   set credit;
+   if gender='Male' then gender1=0;
+   else if gender='Female' then gender1=1;
+   else gender1=100;
+run;   
+
+proc univariate data=credit noprint;
+   histogram gender1;
+/*    histogram ethnicity; */
+run;   
+
+proc reg data=credit;
+   model balance =  gender1;
+run;    
+
+/* Interaction term: Table 3.9 */
+data advertising2;
+   set advertising;
+   tv_radio = tv * radio;
+run;
+
+proc reg data=advertising2;
+   model sales = tv radio tv_radio;
+run;      
 
 
