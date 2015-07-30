@@ -41,6 +41,10 @@ proc sgplot data=advertising;
    reg x=newspaper y=sales;
 run;  
 
+proc sgscatter data=advertising;
+   matrix _numeric_ 
+   / diagonal=(histogram kernel);
+run;   
 
 /* Reproduce Figure 3.3 */
 /* To-do: plot y=2+3x and regression line together on the scatter plot */
@@ -68,6 +72,12 @@ run;
 /* Table 3.5 */
 proc corr data=advertising;
    var tv radio newspaper;
+run;   
+
+/* Table 3.6 */
+proc reg data=advertising;
+   model sales = tv radio newspaper
+         / vif;
 run;   
 
 /* Credit */
@@ -100,4 +110,36 @@ proc reg data=advertising2;
    model sales = tv radio tv_radio;
 run;      
 
+/* Table 3.10 Polynomial Regression */
+filename csvfile "&datapath/Auto.csv";
+proc import datafile=csvfile dbms=csv out=auto replace;
+
+data autoNoMiss;
+   set auto;
+   if cmiss(of _all_) then delete;
+run;   
+
+proc glm data=autoNoMiss;
+   model mpg=horsepower horsepower*horsepower;
+run;   
+
+/* Collinearity Figure 3.14 */
+proc sgscatter data=credit;
+   matrix age limit rating;
+run;   
+
+/* Table 3.11 */
+proc reg data=credit;
+   model balance=age limit;
+run;
+
+proc reg data=credit;
+   model balance=rating limit;
+run;   
+
+/* p102, VIF (Variance Inflation Factors): Collinearity Diagonistics */
+proc reg data=credit;
+   model balance=age limit rating 
+      / vif;
+run;      
 
