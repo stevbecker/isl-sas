@@ -48,6 +48,8 @@ run;
 
 /* Reproduce Figure 3.3 */
 /* To-do: plot y=2+3x and regression line together on the scatter plot */
+/* use SERIES statement in PROC SGPLOT */
+
 proc iml;
 call randseed(2015);
 x = j(100,1);
@@ -143,3 +145,115 @@ proc reg data=credit;
       / vif;
 run;      
 
+
+/* 3.6 Lab: Linear Regression */
+
+filename csvfile "&datapath/Boston.csv";
+proc import datafile=csvfile out=boston dbms=csv replace;
+
+proc contents data=boston;
+run;
+
+proc reg data=boston outest=bostonest;
+   modle medv = lstat;
+/*    model medv = lstat / r clm cli; */
+   /* clm -- option p plus 95% CI for estimated mean */
+   /* cli -- option p plus 95% CI for predicted value */
+run;   
+
+
+/* Check residuals */
+/* http://www.ats.ucla.edu/stat/sas/webbooks/reg/chapter2/sasreg2.htm */
+/* https://www.stat.wisc.edu/~yandell/software/sas/linmod.html */
+proc reg data=boston;
+   model medv = lstat;
+   output out=bostonres (keep=r) residual=r; 
+run;   
+
+proc univariate data=bostonres plots;
+   var r;
+run;   
+
+/* Score a new data set (p111-112, R predict() */
+/* http://support.sas.com/kb/33/307.html */
+
+data need_prediction;
+   input lstat @@;
+datalines;
+5 10 15
+;
+
+data combined;
+   set boston need_prediction;
+run;   
+
+/* Scoring by augumenting the training data set */
+proc reg data=combined;
+   model medv = lstat / p cli clm;
+   id lstat;
+run;
+
+/* Scoring by PROC SCORE */
+to-do: show CLM CLI
+proc reg data=boston noprint outest=est1;
+   model medv = lstat;
+run;
+
+proc score data=need_prediction score=est1 out=prediciton type=parms;
+   var lstat;
+run;   
+
+/* Scoring by PROC PLM */
+proc reg data=boston noprint outest=est1;
+   model medv = lstat;
+   store RegModel;
+run;
+
+proc plm restore=RegModel;
+   score data=need_prediction out=plm_prediction predicted;
+run;
+
+/* plot regression line */
+proc sgplot data=boston;
+   scatter x=lstat y=medv /
+      markerattrs=(symbol=star size=1pct);
+   reg x=lstat y=medv /
+      lineattrs=(color=red pattern=1 thickness=1pct) ;
+run;   
+
+proc reg data=boston;
+   model medv = lstat;
+run;   
+
+/* 3.6.3 Multiple Linear Regression */
+proc reg data=boston;
+   model medv = lstat age;
+run;   
+
+/* to-do: shorthand for all predictors */
+proc reg data=boston;
+   model medv = age black chas crim dis indus 
+               lstat nox ptratio rad rm tax zn / vif;
+run;
+
+/* 3.6.4 Interaction Terms */
+proc glm data=boston;
+   model medv = lstat age lstat*age;
+run;   
+
+/* 3.6.5 Non-linear Transformations of the Predictors */
+proc glm data=boston plots=(diagnostics residuals);
+   model medv = lstat lstat*lstat;
+run;
+
+/* to-do: big difference of results between R and SAS */
+proc glm data=boston plots=(diagnostics residuals);
+   model medv = lstat
+                lstat*lstat 
+                lstat*lstat*lstat 
+                lstat*lstat*lstat*lstat
+                lstat*lstat*lstat*lstat*lstat;
+run;
+
+
+   
