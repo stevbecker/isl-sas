@@ -174,6 +174,7 @@ proc univariate data=bostonres plots;
    var r;
 run;   
 
+
 /* Score a new data set (p111-112, R predict() */
 /* http://support.sas.com/kb/33/307.html */
 
@@ -254,6 +255,60 @@ proc glm data=boston plots=(diagnostics residuals);
                 lstat*lstat*lstat*lstat
                 lstat*lstat*lstat*lstat*lstat;
 run;
+
+
+
+/* Exercise 8 */
+filename csvfile "&datapath/Auto.csv";
+proc import datafile=csvfile out=AutoRaw dbms=csv replace;
+
+data auto;
+   set AutoRaw;
+   if cmiss(of _all_) then delete;
+run;
+
+proc reg data=auto outest=est;
+   model mpg = horsepower;
+   store RegModel;
+run;
+
+/* 8(a)iv */
+/* Scoring by augmenting the training data */
+data need_pred;
+   input horsepower;
+datalines;
+98
+;
+
+data auto2;
+   set auto need_pred;
+run;   
+
+proc print data=auto2;
+   where mpg is missing;
+run;   
+
+proc reg data=auto2;
+   model mpg = horsepower;
+   output out=out1 r=resid p=pred ucl=pihigh lcl=pilow 
+         uclm=cihigh lclm=cilow stdp=stdmean;
+run;   
+   
+data res_pred;
+   set out1;
+   if mpg=.;
+run;         
+
+proc print data=res_pred;
+run;
+   
+
+/* Exercise 9 */
+/* 9(a) */
+proc sgscatter data=auto;
+   matrix _numeric_;
+run;   
+
 
 
    
