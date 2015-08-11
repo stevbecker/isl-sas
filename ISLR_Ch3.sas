@@ -309,6 +309,21 @@ proc sgscatter data=auto;
    matrix _numeric_;
 run;   
 
+/* 9(b) correlatio matrix */
+proc corr data=auto;
+   var _numeric_;
+run;
+
+/* 9(c) multiple linear regression */
+proc reg data=auto;
+   model mpg = cylinders displacement horsepower 
+               weight acceleration year origin;
+run;   
+
+/* 9(e)(f) */
+/* Data analysis is as much an art as a science */
 
 
-   
+
+
+
