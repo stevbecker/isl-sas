@@ -324,6 +324,177 @@ run;
 /* Data analysis is as much an art as a science */
 
 
+/* Exercise 10 */
+filename csvfile "&datapath/Carseats.csv";
+proc import datafile=csvfile dbms=csv out=carseats replace;
 
+
+/* 10(a) */
+proc freq data=carseats;
+   table shelveloc urban us;
+run;
+
+data carseats2 (drop=urban us);
+   set carseats;
+   if urban='Yes' then urban2=1;
+   else urban2=0;
+   if us='Yes' then us2=1;
+   else us2=0;
+run;   
+
+proc means data=carseats2;
+run;
+
+proc glm data=carseats;
+   class urban us;
+   model sales = price urban us;
+run;   
+
+proc reg data=carseats2;
+   model sales = price urban2 us2;
+run;   
+
+/* 10(e) */
+proc reg data=carseats2;
+   model sales = price us2;
+run;
+
+
+/* Exercise 11 */
+/* http://blogs.sas.com/content/iml/2011/08/24/how-to-generate-random-numbers-in-sas.html */
+data xy;
+call streaminit(1);
+do i = 1 to 100;
+   x = rand("Normal");
+   y = 2*x + rand("Normal");
+   output;
+end;
+run;      
+
+proc univariate data=xy;
+var x y;
+histogram x/ endpoints=-3 to 3 by 0.5;
+histogram y/ endpoints=-5 to 5 by 0.5;
+run;
+ 
+/* 11(a) */
+proc reg data=xy;
+   model y = x / noint;
+run;   
+
+/* 11(b) */
+proc reg data=xy;
+   model x = y / noint;
+run;   
+
+
+/* Exercise 13 */
+data xy13;
+call streaminit(1);
+do i = 1 to 100;
+   x = rand("Normal");
+   eps = rand('Normal',0,0.25);
+   y = -1 + 0.5*x + eps;
+   output;
+end;
+run;   
+
+proc univariate data=xy13;
+   var x y eps;
+   histogram x;
+   histogram y;
+   histogram eps;
+run;   
+
+/* 13(c) */
+proc reg data=xy13;
+   model y = x;
+run;      
+
+/* 13(d) */
+proc sgplot data=xy13;
+   scatter x=x y=y;
+run;   
+
+/* 13(f) */
+/* to-do */
+
+/* 13(g) */
+proc glm data=xy13;
+   model y = x x*x;
+run;
+
+
+/* Exercise 14 */
+/* 14(a) */
+data xy14 (drop=i);
+call streaminit(1);
+do i = 1 to 100;
+   x1 = rand('Uniform');
+   x2 = 0.5*x1 + rand('Normal')/10;
+   y = 2 + 2*x1 + 0.3*x2 + rand('Normal');
+   output;
+end;
+run;   
+
+proc univariate data=xy14;
+   var x1 x2 y;
+   histogram x1;
+   histogram x2;
+   histogram y;
+run;   
+   
+proc reg data=xy14;
+   model y = x1 x2;
+run;      
+
+/* 14(b) */
+proc corr data=xy14;
+   var x1 x2;
+run;   
+
+proc sgplot data=xy14;
+   scatter x=x1 y=x2;
+run;   
+
+/* 14(d) */
+proc reg data=xy14;
+   model y = x1;
+run;
+
+/* 14(e) */
+proc reg data=xy14;
+   model y = x2;
+run;
+   
+/* 14(g) */
+data temp;
+   input x1 x2 y;
+   datalines;
+0.1 0.8 6
+;   
+
+data xy14g;
+   set xy14 temp;
+run;   
+
+proc reg data=xy14g;
+   model y = x1 x2;
+run;   
+
+
+/* Exercise 3#15 */
+filename csvfile "&datapath/Boston2.csv";
+proc import datafile=csvfile dbms=csv out=boston replace;
+
+proc contents data=boston;
+run;
+
+proc means data=boston;
+run;
+
+proc reg data=boston;
+   model crim = zn indus chas nox rm age dis rad tax ptratio black lstat medv;
+run;
 
 
