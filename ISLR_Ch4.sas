@@ -102,6 +102,16 @@ proc genmod data=default2;
 
 /* Figure 4.3 */
 /* to-do: the left panel of Figure 4.3 */
+/* http://blogs.sas.com/content/graphicallyspeaking/2013/08/11/customizing-plot-appearance/ */
+/* how to define this problem */
+proc sgplot data=default2;
+   series x=balance y=income / group=student2;
+   run;
+
+proc sgplot data=default2;
+   histogram balance / group=default;
+   run;
+
 proc sgplot data=default2;
    vbox balance / category=student2;
 run;   
